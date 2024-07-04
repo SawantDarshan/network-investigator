@@ -3,23 +3,26 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 )
 
 func main() {
 	// Define routes
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-
 		fmt.Fprintf(w, "Welcome to the Network API!")
 	})
 
-	http.HandleFunc("/check-net", func(w http.ResponseWriter, r *http.Request) {
-
-		queryParam := r.URL.Query()
-
-
-		fmt.Fprintf(w, "%s", queryParam)
-
+	http.HandleFunc("/check-host", func(w http.ResponseWriter, r *http.Request) {
+		queryParam := r.URL.Query().Get("domain")
+		ips, err := net.LookupHost(queryParam)
+		if err != nil {
+			http.Error(w,"Error: ", http.StatusInternalServerError)
+			return
+		}
+		for _, ip := range ips {
+			fmt.Fprintf(w, "IP address: %s", ip)
+		}
 	})
 
 	// Start server
